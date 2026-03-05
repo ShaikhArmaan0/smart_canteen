@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Transactions – Smart Canteen</title>
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body data-page="transactions">
+<div id="toast-wrap"></div>
+
+<nav class="navbar">
+  <a class="nav-brand" href="index.html">
+    <div class="nav-logo">🍽️</div>
+    <div><div class="nav-title">Smart Canteen</div><div class="nav-subtitle">Main Campus</div></div>
+  </a>
+  <div class="nav-center"></div>
+  <div class="nav-right">
+    <span id="nav-user-name" style="font-size:13px;font-weight:600;color:var(--text)"></span>
+    <a class="nav-btn" href="cart.html"><i class="fas fa-shopping-cart"></i><span class="nav-badge cart-badge" style="display:none">0</span></a>
+    <a class="nav-btn" href="profile.html"><i class="fas fa-user"></i></a>
+    <button class="hamburger" id="hamburger"><span></span><span></span><span></span></button>
+  </div>
+</nav>
+
+<div class="app-body">
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-inner">
+      <div class="sidebar-group">
+        <div class="sidebar-label">Menu</div>
+        <div class="sidebar-item" data-href="index.html"><i class="fas fa-home"></i> Home</div>
+        <div class="sidebar-item" data-href="orders.html"><i class="fas fa-receipt"></i> My Orders</div>
+        <div class="sidebar-item" data-href="cart.html"><i class="fas fa-shopping-cart"></i> Cart <span class="sidebar-badge cart-badge" style="display:none">0</span></div>
+        <div class="sidebar-item active" data-href="transactions.html"><i class="fas fa-history"></i> Transactions</div>
+      </div>
+      <div class="sidebar-group">
+        <div class="sidebar-label">More</div>
+        <div class="sidebar-item" data-href="reviews.html"><i class="fas fa-star"></i> Reviews</div>
+        <div class="sidebar-item" data-href="contact.html"><i class="fas fa-phone"></i> Contact</div>
+        <div class="sidebar-item" data-href="privacy.html"><i class="fas fa-shield-alt"></i> Privacy Policy</div>
+        <div class="sidebar-item" data-href="terms.html"><i class="fas fa-file-contract"></i> Terms & Conditions</div>
+      </div>
+    </div>
+    <div class="sidebar-footer">
+      <div class="sidebar-item" data-href="profile.html"><i class="fas fa-user-circle"></i> Profile</div>
+      <div class="sidebar-item" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Logout</div>
+    </div>
+  </aside>
+  <div class="sidebar-backdrop" id="sidebar-backdrop"></div>
+
+  <main class="main-content">
+    <div class="page-title">📋 Order History</div>
+    <div class="page-subtitle">All your past and current orders with receipts</div>
+
+    <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:16px;margin-bottom:24px">
+      <div class="card" style="margin:0;text-align:center">
+        <div style="font-size:24px;font-weight:800;color:var(--danger)" id="tx-total-spent">—</div>
+        <div style="font-size:12px;color:var(--text-2);margin-top:4px">Total Spent</div>
+      </div>
+      <div class="card" style="margin:0;text-align:center">
+        <div style="font-size:24px;font-weight:800;color:var(--primary)" id="tx-count">—</div>
+        <div style="font-size:12px;color:var(--text-2);margin-top:4px">Total Orders</div>
+      </div>
+    </div>
+
+    <div id="transactions-wrap">
+      <div style="text-align:center;padding:30px;color:var(--text-2)">
+        <i class="fas fa-spinner spin" style="font-size:22px;display:block;margin-bottom:10px"></i>Loading transactions…
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- Receipt Modal (reused from orders) -->
+<div class="overlay" id="receipt-modal">
+  <div class="sheet" style="max-width:480px">
+    <div class="sheet-handle"></div>
+    <div class="sheet-title">🧾 Payment Receipt</div>
+    <div id="receipt-body"></div>
+  </div>
+</div>
+
+<script src="js/main.js"></script>
+</body>
+</html>

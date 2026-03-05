@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Home – Smart Canteen</title>
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body data-page="home">
+<div id="toast-wrap"></div>
+
+<!-- Splash (session-gated) -->
+<div id="splash">
+  <div class="splash-icon">🍽️</div>
+  <div class="splash-title">Smart Canteen</div>
+  <div class="splash-sub">Main Campus</div>
+  <div class="splash-ring"></div>
+</div>
+
+<!-- NAVBAR -->
+<nav class="navbar">
+  <a class="nav-brand" href="index.html">
+    <div class="nav-logo">🍽️</div>
+    <div><div class="nav-title">Smart Canteen</div><div class="nav-subtitle">Main Campus</div></div>
+  </a>
+  <div class="nav-center">
+    <div class="nav-search">
+      <i class="fas fa-search"></i>
+      <input type="text" id="search-input" placeholder="Search food items…">
+    </div>
+  </div>
+  <div class="nav-right">
+    <span id="nav-user-name" class="nav-user-name hidden-mobile"></span>
+    <a class="nav-btn" href="cart.html" title="Cart">
+      <i class="fas fa-shopping-cart"></i>
+      <span class="nav-badge cart-badge" style="display:none">0</span>
+    </a>
+    <a class="nav-btn" href="profile.html" title="Profile"><i class="fas fa-user"></i></a>
+    <button class="hamburger" id="hamburger" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</nav>
+
+<div class="app-body">
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-inner">
+      <div class="sidebar-group">
+        <div class="sidebar-label">Menu</div>
+        <div class="sidebar-item active" data-href="index.html"><i class="fas fa-home"></i> Home</div>
+        <div class="sidebar-item" data-href="orders.html"><i class="fas fa-receipt"></i> My Orders</div>
+        <div class="sidebar-item" data-href="cart.html"><i class="fas fa-shopping-cart"></i> Cart <span class="sidebar-badge cart-badge" style="display:none">0</span></div>
+        <div class="sidebar-item" data-href="transactions.html"><i class="fas fa-history"></i> Transactions</div>
+      </div>
+      <div class="sidebar-group">
+        <div class="sidebar-label">More</div>
+        <div class="sidebar-item" data-href="reviews.html"><i class="fas fa-star"></i> Reviews</div>
+        <div class="sidebar-item" data-href="contact.html"><i class="fas fa-phone"></i> Contact / Bulk Orders</div>
+        <div class="sidebar-item" data-href="privacy.html"><i class="fas fa-shield-alt"></i> Privacy Policy</div>
+        <div class="sidebar-item" data-href="terms.html"><i class="fas fa-file-contract"></i> Terms & Conditions</div>
+      </div>
+    </div>
+    <div class="sidebar-footer">
+      <div class="sidebar-item" data-href="profile.html"><i class="fas fa-user-circle"></i> Profile</div>
+      <div class="sidebar-item" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Logout</div>
+    </div>
+  </aside>
+  <div class="sidebar-backdrop" id="sidebar-backdrop"></div>
+
+  <!-- MAIN -->
+  <main class="main-content">
+    <!-- Hero -->
+    <div class="hero-banner">
+      <h1>What's cooking today? 🔥</h1>
+      <p>Fresh, hot meals from your campus canteen delivered right to your token number</p>
+      <div class="hero-chip"><i class="fas fa-clock"></i> Open now · 8 AM – 9 PM</div>
+    </div>
+
+    <!-- Category Filters -->
+    <div class="filters-bar" id="filters-bar">
+      <div class="filter-chip active">🍽️ All</div>
+    </div>
+
+    <!-- Menu Grid -->
+    <div class="section-header">
+      <div class="section-title">Today's Menu</div>
+      <div class="section-count" id="item-count">(0)</div>
+    </div>
+    <div class="menu-grid" id="menu-grid">
+      <!-- Skeleton placeholders -->
+      <div style="aspect-ratio:4/3;border-radius:18px" class="skeleton"></div>
+      <div style="aspect-ratio:4/3;border-radius:18px" class="skeleton"></div>
+      <div style="aspect-ratio:4/3;border-radius:18px" class="skeleton"></div>
+      <div style="aspect-ratio:4/3;border-radius:18px" class="skeleton"></div>
+    </div>
+  </main>
+</div>
+
+<!-- Item Detail Modal -->
+<div class="overlay" id="item-modal">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <div id="item-detail-body"></div>
+  </div>
+</div>
+
+<script src="js/main.js"></script>
+</body>
+</html>

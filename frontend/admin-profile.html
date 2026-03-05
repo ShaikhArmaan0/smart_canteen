@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Admin Profile – Smart Canteen</title>
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body data-page="admin-profile">
+<div id="toast-wrap"></div>
+
+<nav class="navbar">
+  <a class="nav-brand" href="admin.html">
+    <div class="nav-logo" style="background:linear-gradient(135deg,#1a1a2e,#374151)"><i class="fas fa-cog" style="font-size:18px"></i></div>
+    <div><div class="nav-title">Admin Panel</div><div class="nav-subtitle">Smart Canteen</div></div>
+  </a>
+  <div class="nav-right">
+    <a class="nav-btn" href="admin.html" title="Dashboard"><i class="fas fa-chart-line"></i></a>
+    <button class="hamburger" id="hamburger"><span></span><span></span><span></span></button>
+  </div>
+</nav>
+
+<div class="app-body">
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-inner">
+      <div class="sidebar-group">
+        <div class="sidebar-label">Admin</div>
+        <div class="sidebar-item" data-href="admin.html"><i class="fas fa-chart-line"></i> Dashboard</div>
+        <div class="sidebar-item" data-href="admin.html"><i class="fas fa-receipt"></i> Manage Orders</div>
+        <div class="sidebar-item" data-href="admin.html"><i class="fas fa-utensils"></i> Manage Menu</div>
+        <div class="sidebar-item" data-href="admin.html"><i class="fas fa-users"></i> Students</div>
+      </div>
+    </div>
+    <div class="sidebar-footer">
+      <div class="sidebar-item active" data-href="admin-profile.html"><i class="fas fa-user-shield"></i> My Profile</div>
+      <div class="sidebar-item" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Logout</div>
+    </div>
+  </aside>
+  <div class="sidebar-backdrop" id="sidebar-backdrop"></div>
+
+  <main class="main-content">
+    <!-- Profile Hero - Admin style dark -->
+    <div class="profile-hero" style="background:linear-gradient(135deg,#1a1a2e 0%,#374151 100%)">
+      <div class="profile-avatar" id="admin-profile-avatar" style="background:rgba(255,107,53,.3);border-color:rgba(255,107,53,.4)">A</div>
+      <div>
+        <div class="profile-info-name" id="admin-profile-name">Loading…</div>
+        <div class="profile-info-email" id="admin-profile-email">—</div>
+        <div class="profile-info-phone" style="margin-top:4px"><i class="fas fa-phone" style="margin-right:5px;opacity:.7"></i><span id="admin-profile-phone">—</span></div>
+        <span class="profile-info-role" style="background:rgba(255,107,53,.3)">Admin</span>
+      </div>
+      <button onclick="openModal('admin-edit-modal')" style="margin-left:auto;background:rgba(255,107,53,.2);border:1px solid rgba(255,107,53,.4);color:#fff;padding:9px 18px;border-radius:10px;cursor:pointer;font-weight:600;font-size:13px">
+        <i class="fas fa-pen"></i> Edit Profile
+      </button>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px">
+      <!-- Account Settings -->
+      <div>
+        <div class="profile-card">
+          <div class="profile-card-title">🔐 Account Settings</div>
+          <div class="profile-item" onclick="openModal('admin-edit-modal')">
+            <div class="profile-item-icon" style="background:var(--primary-soft);color:var(--primary)"><i class="fas fa-user-edit"></i></div>
+            <div><div class="profile-item-text">Edit Profile</div><div class="profile-item-sub">Update name, email, phone</div></div>
+            <i class="fas fa-chevron-right chevron"></i>
+          </div>
+          <div class="profile-item" onclick="openModal('admin-forgot-modal')">
+            <div class="profile-item-icon" style="background:rgba(59,130,246,.1);color:var(--info)"><i class="fas fa-key"></i></div>
+            <div><div class="profile-item-text">Forgot / Reset Password</div><div class="profile-item-sub">Get a password reset token</div></div>
+            <i class="fas fa-chevron-right chevron"></i>
+          </div>
+        </div>
+        <div class="profile-card">
+          <div class="profile-card-title">Preferences</div>
+          <div class="profile-item" style="cursor:default">
+            <div class="profile-item-icon" style="background:rgba(245,158,11,.1);color:var(--warning)"><i class="fas fa-moon"></i></div>
+            <div class="profile-item-text">Dark Mode</div>
+            <div id="admin-theme-toggle" class="theme-toggle" onclick="toggleTheme()"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Quick Nav -->
+      <div>
+        <div class="profile-card">
+          <div class="profile-card-title">🚀 Quick Navigation</div>
+          <div class="profile-item" onclick="location.href='admin.html'">
+            <div class="profile-item-icon" style="background:var(--primary-soft);color:var(--primary)"><i class="fas fa-chart-line"></i></div>
+            <div><div class="profile-item-text">Dashboard</div><div class="profile-item-sub">Overview & stats</div></div>
+            <i class="fas fa-chevron-right chevron"></i>
+          </div>
+          <div class="profile-item" onclick="location.href='admin.html'">
+            <div class="profile-item-icon" style="background:rgba(34,197,94,.1);color:var(--success)"><i class="fas fa-receipt"></i></div>
+            <div><div class="profile-item-text">Manage Orders</div><div class="profile-item-sub">View & update orders</div></div>
+            <i class="fas fa-chevron-right chevron"></i>
+          </div>
+          <div class="profile-item" onclick="location.href='admin.html'">
+            <div class="profile-item-icon" style="background:rgba(59,130,246,.1);color:var(--info)"><i class="fas fa-utensils"></i></div>
+            <div><div class="profile-item-text">Manage Menu</div><div class="profile-item-sub">Add/edit food items</div></div>
+            <i class="fas fa-chevron-right chevron"></i>
+          </div>
+          <div class="profile-item" onclick="location.href='admin.html'">
+            <div class="profile-item-icon" style="background:rgba(139,92,246,.1);color:var(--purple)"><i class="fas fa-users"></i></div>
+            <div><div class="profile-item-text">Students</div><div class="profile-item-sub">View all registered students</div></div>
+            <i class="fas fa-chevron-right chevron"></i>
+          </div>
+        </div>
+
+        <!-- Admin Info -->
+        <div class="card">
+          <div class="card-title">ℹ️ Admin Info</div>
+          <div style="font-size:13px;color:var(--text-2);line-height:1.8">
+            <div>🔒 Admin accounts cannot be self-registered</div>
+            <div>📧 Contact IT dept to create new admin accounts</div>
+            <div>🛡️ Your actions are logged for audit purposes</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Logout -->
+    <div class="card" style="margin-top:4px">
+      <button class="btn btn-danger" onclick="if(confirm('Logout from admin panel?'))logout()">
+        <i class="fas fa-sign-out-alt"></i> Logout from Admin Panel
+      </button>
+    </div>
+  </main>
+</div>
+
+<!-- Edit Admin Profile -->
+<div class="dialog-overlay" id="admin-edit-modal">
+  <div class="dialog" style="max-width:500px">
+    <div class="dialog-title"><i class="fas fa-user-edit" style="color:var(--primary);margin-right:8px"></i>Edit Admin Profile</div>
+    <form onsubmit="saveAdminProfile(event)">
+      <div class="form-group"><input type="text" id="admin-edit-name" class="form-input" placeholder=" "><label class="form-label">Full Name</label></div>
+      <div class="form-group"><input type="email" id="admin-edit-email" class="form-input" placeholder=" "><label class="form-label">Email Address</label></div>
+      <div class="form-group"><input type="tel" id="admin-edit-phone" class="form-input" placeholder=" "><label class="form-label">Phone Number</label></div>
+      <div class="divider"></div>
+      <p style="font-size:12px;color:var(--text-2);margin-bottom:14px">Leave password fields empty to keep current password</p>
+      <div class="form-group"><input type="password" id="admin-current-pw" class="form-input" placeholder=" "><label class="form-label">Current Password</label></div>
+      <div class="form-group"><input type="password" id="admin-new-pw" class="form-input" placeholder=" "><label class="form-label">New Password</label></div>
+      <div style="display:flex;gap:10px">
+        <button type="submit" class="btn btn-primary" style="flex:1">Save Changes</button>
+        <button type="button" class="btn btn-ghost" onclick="closeModal('admin-edit-modal')">Cancel</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Admin Forgot Password -->
+<div class="dialog-overlay" id="admin-forgot-modal">
+  <div class="dialog">
+    <div class="dialog-title"><i class="fas fa-key" style="color:var(--primary);margin-right:8px"></i>Reset Admin Password</div>
+    <div class="dialog-sub">Enter your admin email to generate a reset token</div>
+    <form onsubmit="handleForgotPassword(event)">
+      <div class="form-group"><input type="email" id="forgot-email" class="form-input" placeholder=" "><label class="form-label">Admin Email</label></div>
+      <button type="submit" class="btn btn-primary" style="margin-bottom:14px">Generate Reset Token</button>
+    </form>
+    <div id="forgot-token-section" class="hidden">
+      <div class="divider"></div>
+      <p style="font-size:13px;color:var(--text-2);margin-bottom:14px">Check browser console for the token (demo mode):</p>
+      <form onsubmit="handleResetPassword(event)">
+        <div class="form-group"><input type="text" id="reset-token" class="form-input" placeholder=" "><label class="form-label">Reset Token</label></div>
+        <div class="form-group"><input type="password" id="reset-new-pw" class="form-input" placeholder=" "><label class="form-label">New Password</label></div>
+        <button type="submit" class="btn btn-primary">Reset Password</button>
+      </form>
+    </div>
+    <button class="btn btn-ghost" style="width:100%;margin-top:10px" onclick="closeModal('admin-forgot-modal')">Cancel</button>
+  </div>
+</div>
+
+<script src="js/main.js"></script>
+</body>
+</html>

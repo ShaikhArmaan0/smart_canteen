@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Login – Smart Canteen</title>
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+<div id="toast-wrap"></div>
+
+<!-- Splash -->
+<div id="splash">
+  <div class="splash-icon">🍽️</div>
+  <div class="splash-title">Smart Canteen</div>
+  <div class="splash-sub">Main Campus</div>
+  <div class="splash-ring"></div>
+</div>
+
+<div class="auth-page">
+  <div class="auth-container">
+    <!-- Left branding -->
+    <div class="auth-left">
+      <div class="auth-left-logo">🍽️</div>
+      <h1>Smart Canteen</h1>
+      <p>Order delicious food from your campus canteen. Fast, fresh, and easy!</p>
+      <div class="auth-feature"><i class="fas fa-bolt"></i> Quick ordering in seconds</div>
+      <div class="auth-feature"><i class="fas fa-receipt"></i> Digital receipts & tracking</div>
+      <div class="auth-feature"><i class="fas fa-history"></i> Full order history</div>
+      <div class="auth-feature"><i class="fas fa-star"></i> Rate and review meals</div>
+    </div>
+
+    <!-- Right forms -->
+    <div class="auth-right">
+      <div class="auth-tabs">
+        <div class="auth-tab active" data-tab="login" onclick="switchTab('login')">Sign In</div>
+        <div class="auth-tab" data-tab="register" onclick="switchTab('register')">Register</div>
+      </div>
+
+      <!-- LOGIN -->
+      <form id="form-login" class="auth-form" onsubmit="handleLogin(event)">
+        <div class="demo-box">
+          <strong>Demo Accounts</strong>
+          Student: rahul@student.com / student123<br>
+          Admin: admin@canteen.com / admin123
+        </div>
+        <div class="form-group">
+          <input type="email" id="l-email" class="form-input" placeholder=" " autocomplete="email">
+          <label class="form-label" for="l-email">Email Address</label>
+          <div class="form-error">Email is required</div>
+        </div>
+        <div class="form-group">
+          <input type="password" id="l-pass" class="form-input has-right" placeholder=" " autocomplete="current-password">
+          <label class="form-label" for="l-pass">Password</label>
+          <i class="fas fa-eye input-right-icon" id="l-eye" onclick="togglePw('l-pass','l-eye')"></i>
+          <div class="form-error">Password is required</div>
+        </div>
+        <div style="text-align:right;margin-bottom:18px;margin-top:-8px">
+          <a onclick="openModal('forgot-modal')" style="font-size:13px;color:var(--primary);cursor:pointer;font-weight:500">Forgot password?</a>
+        </div>
+        <button type="submit" class="btn btn-primary"><i class="fas fa-sign-in-alt"></i> Sign In</button>
+      </form>
+
+      <!-- REGISTER -->
+      <form id="form-register" class="auth-form hidden" onsubmit="handleRegister(event)">
+        <div class="form-group">
+          <input type="text" id="r-name" class="form-input" placeholder=" " autocomplete="name">
+          <label class="form-label" for="r-name">Full Name</label>
+          <div class="form-error">Name is required</div>
+        </div>
+        <div class="form-group">
+          <input type="email" id="r-email" class="form-input" placeholder=" " autocomplete="email">
+          <label class="form-label" for="r-email">Email Address</label>
+          <div class="form-error">Email is required</div>
+        </div>
+        <div class="form-group">
+          <input type="tel" id="r-phone" class="form-input" placeholder=" " autocomplete="tel">
+          <label class="form-label" for="r-phone">Phone Number (optional)</label>
+        </div>
+        <div class="form-group">
+          <input type="password" id="r-pass" class="form-input has-right" placeholder=" " autocomplete="new-password">
+          <label class="form-label" for="r-pass">Password (min 6 chars)</label>
+          <i class="fas fa-eye input-right-icon" id="r-eye" onclick="togglePw('r-pass','r-eye')"></i>
+          <div class="form-error">Password is required</div>
+        </div>
+        <button type="submit" class="btn btn-primary"><i class="fas fa-user-plus"></i> Create Account</button>
+        <p style="text-align:center;font-size:12px;color:var(--text-3);margin-top:14px">By registering, you agree to our <a href="terms.html" style="color:var(--primary)">Terms</a> & <a href="privacy.html" style="color:var(--primary)">Privacy Policy</a></p>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Forgot Password Modal -->
+<div class="dialog-overlay" id="forgot-modal">
+  <div class="dialog">
+    <div class="dialog-title"><i class="fas fa-key" style="color:var(--primary);margin-right:8px"></i>Reset Password</div>
+    <div class="dialog-sub">Enter your email to receive a reset token</div>
+    <form onsubmit="handleForgotPassword(event)">
+      <div class="form-group">
+        <input type="email" id="forgot-email" class="form-input" placeholder=" ">
+        <label class="form-label">Email Address</label>
+      </div>
+      <button type="submit" class="btn btn-primary" style="margin-bottom:14px">Send Reset Link</button>
+    </form>
+    <div id="forgot-token-section" class="hidden">
+      <div class="divider"></div>
+      <p style="font-size:13px;color:var(--text-2);margin-bottom:14px">Check browser console for your demo token, then enter it below:</p>
+      <form onsubmit="handleResetPassword(event)">
+        <div class="form-group">
+          <input type="text" id="reset-token" class="form-input" placeholder=" ">
+          <label class="form-label">Reset Token</label>
+        </div>
+        <div class="form-group">
+          <input type="password" id="reset-new-pw" class="form-input" placeholder=" ">
+          <label class="form-label">New Password</label>
+        </div>
+        <button type="submit" class="btn btn-primary">Reset Password</button>
+      </form>
+    </div>
+    <button class="btn btn-ghost" style="width:100%;margin-top:10px" onclick="closeModal('forgot-modal')">Cancel</button>
+  </div>
+</div>
+
+<script src="js/main.js"></script>
+</body>
+</html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Login – Smart Canteen</title>
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+<div id="toast-wrap"></div>
+
+<!-- Splash -->
+<div id="splash">
+  <div class="splash-icon">🍽️</div>
+  <div class="splash-title">Smart Canteen</div>
+  <div class="splash-sub">Main Campus</div>
+  <div class="splash-ring"></div>
+</div>
+
+<div class="auth-page">
+  <div class="auth-container">
+    <!-- Left branding -->
+    <div class="auth-left">
+      <div class="auth-left-logo">🍽️</div>
+      <h1>Smart Canteen</h1>
+      <p>Order delicious food from your campus canteen. Fast, fresh, and easy!</p>
+      <div class="auth-feature"><i class="fas fa-bolt"></i> Quick ordering in seconds</div>
+      <div class="auth-feature"><i class="fas fa-receipt"></i> Digital receipts & tracking</div>
+      <div class="auth-feature"><i class="fas fa-history"></i> Full order history</div>
+      <div class="auth-feature"><i class="fas fa-star"></i> Rate and review meals</div>
+    </div>
+
+    <!-- Right forms -->
+    <div class="auth-right">
+      <div class="auth-tabs">
+        <div class="auth-tab active" data-tab="login" onclick="switchTab('login')">Sign In</div>
+        <div class="auth-tab" data-tab="register" onclick="switchTab('register')">Register</div>
+      </div>
+
+      <!-- LOGIN -->
+      <form id="form-login" class="auth-form" onsubmit="handleLogin(event)">
+        <div class="demo-box">
+          <strong>Demo Accounts</strong>
+          Student: rahul@student.com / student123<br>
+          Admin: admin@canteen.com / admin123
+        </div>
+        <div class="form-group">
+          <input type="email" id="l-email" class="form-input" placeholder=" " autocomplete="email">
+          <label class="form-label" for="l-email">Email Address</label>
+          <div class="form-error">Email is required</div>
+        </div>
+        <div class="form-group">
+          <input type="password" id="l-pass" class="form-input has-right" placeholder=" " autocomplete="current-password">
+          <label class="form-label" for="l-pass">Password</label>
+          <i class="fas fa-eye input-right-icon" id="l-eye" onclick="togglePw('l-pass','l-eye')"></i>
+          <div class="form-error">Password is required</div>
+        </div>
+        <div style="text-align:right;margin-bottom:18px;margin-top:-8px">
+          <a onclick="openModal('forgot-modal')" style="font-size:13px;color:var(--primary);cursor:pointer;font-weight:500">Forgot password?</a>
+        </div>
+        <button type="submit" class="btn btn-primary"><i class="fas fa-sign-in-alt"></i> Sign In</button>
+      </form>
+
+      <!-- REGISTER -->
+      <form id="form-register" class="auth-form hidden" onsubmit="handleRegister(event)">
+        <div class="form-group">
+          <input type="text" id="r-name" class="form-input" placeholder=" " autocomplete="name">
+          <label class="form-label" for="r-name">Full Name</label>
+          <div class="form-error">Name is required</div>
+        </div>
+        <div class="form-group">
+          <input type="email" id="r-email" class="form-input" placeholder=" " autocomplete="email">
+          <label class="form-label" for="r-email">Email Address</label>
+          <div class="form-error">Email is required</div>
+        </div>
+        <div class="form-group">
+          <input type="tel" id="r-phone" class="form-input" placeholder=" " autocomplete="tel" required>
+          <label class="form-label" for="r-phone">Phone Number *</label>
+        </div>
+        <div class="form-group">
+          <input type="password" id="r-pass" class="form-input has-right" placeholder=" " autocomplete="new-password">
+          <label class="form-label" for="r-pass">Password (min 6 chars)</label>
+          <i class="fas fa-eye input-right-icon" id="r-eye" onclick="togglePw('r-pass','r-eye')"></i>
+          <div class="form-error">Password is required</div>
+        </div>
+        <button type="submit" class="btn btn-primary"><i class="fas fa-user-plus"></i> Create Account</button>
+        <p style="text-align:center;font-size:12px;color:var(--text-3);margin-top:14px">By registering, you agree to our <a href="terms.html" style="color:var(--primary)">Terms</a> & <a href="privacy.html" style="color:var(--primary)">Privacy Policy</a></p>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Forgot Password Modal -->
+<div class="dialog-overlay" id="forgot-modal">
+  <div class="dialog">
+    <div class="dialog-title"><i class="fas fa-key" style="color:var(--primary);margin-right:8px"></i>Reset Password</div>
+    <div class="dialog-sub">Enter your email to receive a reset token</div>
+    <form onsubmit="handleForgotPassword(event)">
+      <div class="form-group">
+        <input type="email" id="forgot-email" class="form-input" placeholder=" ">
+        <label class="form-label">Email Address</label>
+      </div>
+      <button type="submit" class="btn btn-primary" style="margin-bottom:14px">Send Reset Link</button>
+    </form>
+    <div id="forgot-token-section" class="hidden">
+      <div class="divider"></div>
+      <p style="font-size:13px;color:var(--text-2);margin-bottom:14px">Check browser console for your demo token, then enter it below:</p>
+      <form onsubmit="handleResetPassword(event)">
+        <div class="form-group">
+          <input type="text" id="reset-token" class="form-input" placeholder=" ">
+          <label class="form-label">Reset Token</label>
+        </div>
+        <div class="form-group">
+          <input type="password" id="reset-new-pw" class="form-input" placeholder=" ">
+          <label class="form-label">New Password</label>
+        </div>
+        <button type="submit" class="btn btn-primary">Reset Password</button>
+      </form>
+    </div>
+    <button class="btn btn-ghost" style="width:100%;margin-top:10px" onclick="closeModal('forgot-modal')">Cancel</button>
+  </div>
+</div>
+
+<script src="js/main.js"></script>
+</body>
+</html>

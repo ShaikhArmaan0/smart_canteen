@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Reviews – Smart Canteen</title>
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body data-page="reviews">
+<div id="toast-wrap"></div>
+
+<nav class="navbar">
+  <a class="nav-brand" href="index.html">
+    <div class="nav-logo">🍽️</div>
+    <div><div class="nav-title">Smart Canteen</div><div class="nav-subtitle">Main Campus</div></div>
+  </a>
+  <div class="nav-center"></div>
+  <div class="nav-right">
+    <span id="nav-user-name" style="font-size:13px;font-weight:600;color:var(--text)"></span>
+    <a class="nav-btn" href="cart.html"><i class="fas fa-shopping-cart"></i><span class="nav-badge cart-badge" style="display:none">0</span></a>
+    <a class="nav-btn" href="profile.html"><i class="fas fa-user"></i></a>
+    <button class="hamburger" id="hamburger"><span></span><span></span><span></span></button>
+  </div>
+</nav>
+
+<div class="app-body">
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-inner">
+      <div class="sidebar-group">
+        <div class="sidebar-label">Menu</div>
+        <div class="sidebar-item" data-href="index.html"><i class="fas fa-home"></i> Home</div>
+        <div class="sidebar-item" data-href="orders.html"><i class="fas fa-receipt"></i> My Orders</div>
+        <div class="sidebar-item" data-href="cart.html"><i class="fas fa-shopping-cart"></i> Cart <span class="sidebar-badge cart-badge" style="display:none">0</span></div>
+        <div class="sidebar-item" data-href="transactions.html"><i class="fas fa-history"></i> Transactions</div>
+      </div>
+      <div class="sidebar-group">
+        <div class="sidebar-label">More</div>
+        <div class="sidebar-item active" data-href="reviews.html"><i class="fas fa-star"></i> Reviews</div>
+        <div class="sidebar-item" data-href="contact.html"><i class="fas fa-phone"></i> Contact</div>
+        <div class="sidebar-item" data-href="privacy.html"><i class="fas fa-shield-alt"></i> Privacy Policy</div>
+        <div class="sidebar-item" data-href="terms.html"><i class="fas fa-file-contract"></i> Terms & Conditions</div>
+      </div>
+    </div>
+    <div class="sidebar-footer">
+      <div class="sidebar-item" data-href="profile.html"><i class="fas fa-user-circle"></i> Profile</div>
+      <div class="sidebar-item" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Logout</div>
+    </div>
+  </aside>
+  <div class="sidebar-backdrop" id="sidebar-backdrop"></div>
+
+  <main class="main-content">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
+      <div class="page-title">⭐ Reviews & Feedback</div>
+      <button class="btn btn-primary" style="width:auto;padding:10px 20px" onclick="isLoggedIn()?openModal('review-modal'):location.href='login.html'">
+        <i class="fas fa-pen"></i> Write Review
+      </button>
+    </div>
+    <div class="page-subtitle">What our campus community says</div>
+
+    <!-- Stats -->
+    <div class="card" style="display:flex;align-items:center;gap:32px;margin-bottom:24px;flex-wrap:wrap">
+      <div style="text-align:center">
+        <div style="font-size:52px;font-weight:900;color:var(--primary)" id="avg-rating">—</div>
+        <div style="color:var(--warning);font-size:20px;margin:4px 0">★★★★★</div>
+        <div style="font-size:12px;color:var(--text-2)">Average Rating</div>
+      </div>
+      <div class="divider" style="height:80px;width:1px;margin:0"></div>
+      <div>
+        <div style="font-size:24px;font-weight:800" id="review-count">0</div>
+        <div style="font-size:13px;color:var(--text-2)">Total Reviews</div>
+      </div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:18px" id="reviews-wrap">
+      <div style="text-align:center;padding:30px;color:var(--text-2)">
+        <i class="fas fa-spinner spin" style="font-size:22px;display:block;margin-bottom:10px"></i>Loading reviews…
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- Write Review Modal -->
+<div class="dialog-overlay" id="review-modal">
+  <div class="dialog" style="max-width:480px">
+    <div class="dialog-title"><i class="fas fa-star" style="color:var(--warning);margin-right:8px"></i>Write a Review</div>
+    <div class="dialog-sub">Share your experience with the canteen</div>
+    <form onsubmit="submitReview(event)">
+      <div style="margin-bottom:18px">
+        <p style="font-size:13px;font-weight:600;margin-bottom:8px">Your Rating</p>
+        <div class="star-rating" id="star-rating">
+          <i class="fas fa-star" onclick="selectStar(1)"></i>
+          <i class="fas fa-star" onclick="selectStar(2)"></i>
+          <i class="fas fa-star" onclick="selectStar(3)"></i>
+          <i class="fas fa-star" onclick="selectStar(4)"></i>
+          <i class="fas fa-star" onclick="selectStar(5)"></i>
+        </div>
+      </div>
+      <div class="form-group">
+        <textarea id="review-comment" class="form-input" rows="4" placeholder="Tell us about your experience…" style="padding-top:12px;resize:vertical"></textarea>
+      </div>
+      <div style="display:flex;gap:10px">
+        <button type="submit" class="btn btn-primary" style="flex:1"><i class="fas fa-paper-plane"></i> Submit</button>
+        <button type="button" class="btn btn-ghost" onclick="closeModal('review-modal')">Cancel</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script src="js/main.js"></script>
+</body>
+</html>

@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Profile – Smart Canteen</title>
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body data-page="profile">
+<div id="toast-wrap"></div>
+
+<nav class="navbar">
+  <a class="nav-brand" href="index.html">
+    <div class="nav-logo">🍽️</div>
+    <div><div class="nav-title">Smart Canteen</div><div class="nav-subtitle">Main Campus</div></div>
+  </a>
+  <div class="nav-center"></div>
+  <div class="nav-right">
+    <a class="nav-btn" href="cart.html">
+      <i class="fas fa-shopping-cart"></i>
+      <span class="nav-badge cart-badge" style="display:none">0</span>
+    </a>
+    <button class="hamburger" id="hamburger"><span></span><span></span><span></span></button>
+  </div>
+</nav>
+
+<div class="app-body">
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-inner">
+      <div class="sidebar-group">
+        <div class="sidebar-label">Menu</div>
+        <div class="sidebar-item" data-href="index.html"><i class="fas fa-home"></i> Home</div>
+        <div class="sidebar-item" data-href="orders.html"><i class="fas fa-receipt"></i> My Orders</div>
+        <div class="sidebar-item" data-href="cart.html"><i class="fas fa-shopping-cart"></i> Cart <span class="sidebar-badge cart-badge" style="display:none">0</span></div>
+        <div class="sidebar-item" data-href="transactions.html"><i class="fas fa-history"></i> Transactions</div>
+      </div>
+      <div class="sidebar-group">
+        <div class="sidebar-label">More</div>
+        <div class="sidebar-item" data-href="reviews.html"><i class="fas fa-star"></i> Reviews</div>
+        <div class="sidebar-item" data-href="contact.html"><i class="fas fa-phone"></i> Contact</div>
+        <div class="sidebar-item" data-href="privacy.html"><i class="fas fa-shield-alt"></i> Privacy Policy</div>
+        <div class="sidebar-item" data-href="terms.html"><i class="fas fa-file-contract"></i> Terms & Conditions</div>
+      </div>
+    </div>
+    <div class="sidebar-footer">
+      <div class="sidebar-item active" data-href="profile.html"><i class="fas fa-user-circle"></i> Profile</div>
+      <div class="sidebar-item" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Logout</div>
+    </div>
+  </aside>
+  <div class="sidebar-backdrop" id="sidebar-backdrop"></div>
+
+  <main class="main-content">
+    <!-- Profile Hero -->
+    <div class="profile-hero">
+      <div class="profile-avatar" id="profile-avatar">U</div>
+      <div>
+        <div class="profile-info-name" id="profile-name">Loading…</div>
+        <div class="profile-info-email" id="profile-email">—</div>
+        <div class="profile-info-phone"><i class="fas fa-phone" style="margin-right:5px;opacity:.7"></i><span id="profile-phone">—</span></div>
+        <span class="profile-info-role" id="profile-role">student</span>
+      </div>
+      <button onclick="openModal('edit-profile-modal')" style="margin-left:auto;background:rgba(255,255,255,.2);border:none;color:#fff;padding:9px 18px;border-radius:10px;cursor:pointer;font-weight:600;font-size:13px;backdrop-filter:blur(8px)">
+        <i class="fas fa-pen"></i> Edit Profile
+      </button>
+    </div>
+
+    <!-- Stats Row -->
+    <div class="profile-stats-grid">
+      <div class="card" style="text-align:center;margin:0;padding:18px">
+        <div style="font-size:26px;font-weight:800;color:var(--primary)" id="profile-order-count">—</div>
+        <div style="font-size:12px;color:var(--text-2);margin-top:4px">Total Orders</div>
+      </div>
+      <div class="card" style="text-align:center;margin:0;padding:18px">
+        <div style="font-size:26px;font-weight:800;color:var(--success)" id="profile-spent">—</div>
+        <div style="font-size:12px;color:var(--text-2);margin-top:4px">Total Spent</div>
+      </div>
+      <div class="card" style="text-align:center;margin:0;padding:18px">
+        <div style="font-size:26px;font-weight:800;color:var(--info)" id="profile-avg">—</div>
+        <div style="font-size:12px;color:var(--text-2);margin-top:4px">Avg Order Value</div>
+      </div>
+    </div>
+
+    <div class="profile-two-col">
+      <!-- Quick Links -->
+      <div>
+        <div class="profile-card">
+          <div class="profile-card-title">Account</div>
+          <div class="profile-item" onclick="openModal('edit-profile-modal')">
+            <div class="profile-item-icon" style="background:var(--primary-soft);color:var(--primary)"><i class="fas fa-user-edit"></i></div>
+            <div><div class="profile-item-text">Edit Profile</div><div class="profile-item-sub">Update name, email, phone</div></div>
+            <i class="fas fa-chevron-right chevron"></i>
+          </div>
+          <div class="profile-item" onclick="openModal('change-pw-modal')">
+            <div class="profile-item-icon" style="background:rgba(59,130,246,.1);color:var(--info)"><i class="fas fa-lock"></i></div>
+            <div><div class="profile-item-text">Change Password</div><div class="profile-item-sub">Update your password</div></div>
+            <i class="fas fa-chevron-right chevron"></i>
+          </div>
+        </div>
+        <div class="profile-card">
+          <div class="profile-card-title">Preferences</div>
+          <div class="profile-item" style="cursor:default">
+            <div class="profile-item-icon" style="background:rgba(245,158,11,.1);color:var(--warning)"><i class="fas fa-moon"></i></div>
+            <div class="profile-item-text">Dark Mode</div>
+            <div id="theme-toggle" class="theme-toggle" onclick="toggleTheme()"></div>
+          </div>
+        </div>
+      </div>
+      <!-- Activity Links -->
+      <div>
+        <div class="profile-card">
+          <div class="profile-card-title">Activity</div>
+          <div class="profile-item" onclick="location.href='orders.html'">
+            <div class="profile-item-icon" style="background:var(--primary-soft);color:var(--primary)"><i class="fas fa-receipt"></i></div>
+            <div><div class="profile-item-text">My Orders</div><div class="profile-item-sub">View all orders</div></div>
+            <i class="fas fa-chevron-right chevron"></i>
+          </div>
+          <div class="profile-item" onclick="location.href='transactions.html'">
+            <div class="profile-item-icon" style="background:rgba(34,197,94,.1);color:var(--success)"><i class="fas fa-history"></i></div>
+            <div><div class="profile-item-text">Transactions</div><div class="profile-item-sub">Payment history</div></div>
+            <i class="fas fa-chevron-right chevron"></i>
+          </div>
+          <div class="profile-item" onclick="location.href='reviews.html'">
+            <div class="profile-item-icon" style="background:rgba(245,158,11,.1);color:var(--warning)"><i class="fas fa-star"></i></div>
+            <div><div class="profile-item-text">Reviews & Feedback</div><div class="profile-item-sub">Your reviews</div></div>
+            <i class="fas fa-chevron-right chevron"></i>
+          </div>
+        </div>
+        <div class="profile-card">
+          <div class="profile-card-title">Support</div>
+          <div class="profile-item" onclick="location.href='contact.html'">
+            <div class="profile-item-icon" style="background:rgba(59,130,246,.1);color:var(--info)"><i class="fas fa-phone"></i></div>
+            <div><div class="profile-item-text">Contact Us</div><div class="profile-item-sub">Bulk orders & support</div></div>
+            <i class="fas fa-chevron-right chevron"></i>
+          </div>
+          <div class="profile-item" onclick="location.href='privacy.html'">
+            <div class="profile-item-icon" style="background:rgba(139,92,246,.1);color:var(--purple)"><i class="fas fa-shield-alt"></i></div>
+            <div><div class="profile-item-text">Privacy Policy</div></div>
+            <i class="fas fa-chevron-right chevron"></i>
+          </div>
+          <div class="profile-item" onclick="location.href='terms.html'">
+            <div class="profile-item-icon" style="background:rgba(239,68,68,.1);color:var(--danger)"><i class="fas fa-file-contract"></i></div>
+            <div><div class="profile-item-text">Terms & Conditions</div></div>
+            <i class="fas fa-chevron-right chevron"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Danger Zone -->
+    <div class="card">
+      <div class="card-title">⚠️ Account Actions</div>
+      <button class="btn btn-danger" onclick="if(confirm('Are you sure you want to logout?'))logout()">
+        <i class="fas fa-sign-out-alt"></i> Logout
+      </button>
+    </div>
+
+    <!-- FOOTER -->
+    <footer class="page-footer">
+      <div class="footer-grid">
+        <div>
+          <div class="footer-col-title">🍽️ Smart Canteen</div>
+          <p style="font-size:12.5px;color:var(--text-2);line-height:1.7">Your campus food hub. Fresh, tasty meals at affordable prices.</p>
+        </div>
+        <div>
+          <div class="footer-col-title">Quick Links</div>
+          <a class="footer-link" href="index.html">Home</a>
+          <a class="footer-link" href="orders.html">My Orders</a>
+          <a class="footer-link" href="transactions.html">Transactions</a>
+          <a class="footer-link" href="reviews.html">Reviews</a>
+        </div>
+        <div>
+          <div class="footer-col-title">Legal</div>
+          <a class="footer-link" href="privacy.html">Privacy Policy</a>
+          <a class="footer-link" href="terms.html">Terms & Conditions</a>
+          <a class="footer-link" href="contact.html">Contact Us</a>
+        </div>
+        <div>
+          <div class="footer-col-title">Contact</div>
+          <p style="font-size:12.5px;color:var(--text-2)"><i class="fas fa-envelope" style="color:var(--primary);margin-right:5px"></i> support@canteen.edu</p>
+          <p style="font-size:12.5px;color:var(--text-2);margin-top:6px"><i class="fas fa-phone" style="color:var(--primary);margin-right:5px"></i> +91-9000000000</p>
+          <p style="font-size:12.5px;color:var(--text-2);margin-top:6px"><i class="fas fa-map-marker-alt" style="color:var(--primary);margin-right:5px"></i> Block A, Ground Floor</p>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <span class="footer-copy">© 2025 Smart Canteen. All rights reserved.</span>
+        <span style="font-size:12px;color:var(--text-3)">Made with ❤️ for campus life</span>
+      </div>
+    </footer>
+  </main>
+</div>
+
+<!-- Edit Profile Modal -->
+<div class="dialog-overlay" id="edit-profile-modal">
+  <div class="dialog" style="max-width:500px">
+    <div class="dialog-title"><i class="fas fa-user-edit" style="color:var(--primary);margin-right:8px"></i>Edit Profile</div>
+    <form onsubmit="saveProfile(event)">
+      <div class="form-group">
+        <input type="text" id="edit-name" class="form-input" placeholder=" ">
+        <label class="form-label">Full Name</label>
+      </div>
+      <div class="form-group">
+        <input type="email" id="edit-email" class="form-input" placeholder=" ">
+        <label class="form-label">Email Address</label>
+      </div>
+      <div class="form-group">
+        <input type="tel" id="edit-phone" class="form-input" placeholder=" ">
+        <label class="form-label">Phone Number</label>
+      </div>
+      <div class="divider"></div>
+      <p style="font-size:12px;color:var(--text-2);margin-bottom:14px">Leave password fields empty to keep current password</p>
+      <div class="form-group">
+        <input type="password" id="edit-current-pw" class="form-input" placeholder=" ">
+        <label class="form-label">Current Password</label>
+      </div>
+      <div class="form-group">
+        <input type="password" id="edit-new-pw" class="form-input" placeholder=" ">
+        <label class="form-label">New Password</label>
+      </div>
+      <div style="display:flex;gap:10px;margin-top:6px">
+        <button type="submit" class="btn btn-primary" style="flex:1">Save Changes</button>
+        <button type="button" class="btn btn-ghost" style="flex:1" onclick="closeModal('edit-profile-modal')">Cancel</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Change Password shortcut modal -->
+<div class="dialog-overlay" id="change-pw-modal">
+  <div class="dialog">
+    <div class="dialog-title"><i class="fas fa-lock" style="color:var(--primary);margin-right:8px"></i>Change Password</div>
+    <form onsubmit="savePassword(event)">
+      <div class="form-group">
+        <input type="password" id="cpw-current" class="form-input" placeholder=" ">
+        <label class="form-label">Current Password</label>
+      </div>
+      <div class="form-group">
+        <input type="password" id="cpw-new" class="form-input" placeholder=" ">
+        <label class="form-label">New Password (min 6 chars)</label>
+      </div>
+      <div style="display:flex;gap:10px;margin-top:6px">
+        <button type="submit" class="btn btn-primary" style="flex:1">Update Password</button>
+        <button type="button" class="btn btn-ghost" onclick="closeModal('change-pw-modal')">Cancel</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script src="js/main.js"></script>
+</body>
+</html>

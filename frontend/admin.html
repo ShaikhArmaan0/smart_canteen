@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Admin Panel – Smart Canteen</title>
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+.admin-tab-panel{animation:fadeUp .3s ease}
+.toolbar{display:flex;gap:10px;align-items:center;margin-bottom:18px;flex-wrap:wrap}
+.search-bar{display:flex;align-items:center;gap:8px;background:var(--surface2);border-radius:10px;padding:8px 14px;min-width:220px}
+.search-bar input{border:none;background:transparent;outline:none;font-size:13px;color:var(--text);width:100%}
+.search-bar i{color:var(--text-3);font-size:13px;flex-shrink:0}
+.live-badge{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:600;color:var(--success);background:rgba(16,185,129,.1);padding:4px 10px;border-radius:20px}
+.live-badge .dot{width:6px;height:6px;border-radius:50%;background:var(--success);animation:blink 1.5s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
+.notif-dot{display:inline-flex;align-items:center;justify-content:center;min-width:18px;height:18px;background:var(--danger);color:#fff;font-size:10px;font-weight:700;border-radius:10px;padding:0 4px;margin-left:5px}
+</style>
+</head>
+<body data-page="admin">
+<div id="toast-wrap"></div>
+
+<nav class="navbar">
+  <a class="nav-brand" href="admin.html">
+    <div class="nav-logo" style="background:linear-gradient(135deg,#1a1a2e,#374151)"><i class="fas fa-cog" style="font-size:18px"></i></div>
+    <div><div class="nav-title">Admin Panel</div><div class="nav-subtitle">Smart Canteen</div></div>
+  </a>
+  <div class="nav-right">
+    <span class="live-badge"><span class="dot"></span> Live</span>
+    <span id="nav-user-name" style="font-size:13px;font-weight:600;color:var(--text);margin:0 8px"></span>
+    <a class="nav-btn" href="admin-profile.html" title="Profile"><i class="fas fa-user-shield"></i></a>
+    <button class="hamburger" id="hamburger"><span></span><span></span><span></span></button>
+  </div>
+</nav>
+
+<div class="app-body">
+  <!-- Sidebar -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-inner">
+      <div class="sidebar-group">
+        <div class="sidebar-label">Admin</div>
+        <div class="sidebar-item active" onclick="switchAdminTab('dashboard')"><i class="fas fa-chart-line"></i> Dashboard</div>
+        <div class="sidebar-item" onclick="switchAdminTab('orders')"><i class="fas fa-receipt"></i> Manage Orders</div>
+        <div class="sidebar-item" onclick="switchAdminTab('menu')"><i class="fas fa-utensils"></i> Manage Menu</div>
+        <div class="sidebar-item" onclick="switchAdminTab('users')"><i class="fas fa-users"></i> Students</div>
+        <div class="sidebar-item" onclick="switchAdminTab('reviews')"><i class="fas fa-star"></i> Reviews</div>
+        <div class="sidebar-item" onclick="switchAdminTab('enquiries')"><i class="fas fa-envelope"></i> Enquiries <span class="notif-dot" id="enquiries-unread-badge" style="display:none"></span></div>
+        <div class="sidebar-item" onclick="switchAdminTab('refunds')"><i class="fas fa-hand-holding-usd"></i> Refunds</div>
+      </div>
+    </div>
+    <div class="sidebar-footer">
+      <div class="sidebar-item" data-href="admin-profile.html"><i class="fas fa-user-shield"></i> My Profile</div>
+      <div class="sidebar-item" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Logout</div>
+    </div>
+  </aside>
+  <div class="sidebar-backdrop" id="sidebar-backdrop"></div>
+
+  <main class="main-content">
+
+    <!-- ─── DASHBOARD ─── -->
+    <div class="admin-tab-panel" data-panel="dashboard">
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-icon-wrap orange"><i class="fas fa-receipt"></i></div>
+          <div class="stat-num" id="stat-today-orders">—</div>
+          <div class="stat-label">Total Orders</div>
+          <div id="stat-sub-orders" style="font-size:11px;color:var(--success);font-weight:600;margin-top:2px"></div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon-wrap green"><i class="fas fa-rupee-sign"></i></div>
+          <div class="stat-num" id="stat-today-sales">—</div>
+          <div class="stat-label">Total Revenue</div>
+          <div id="stat-sub-sales" style="font-size:11px;color:var(--success);font-weight:600;margin-top:2px"></div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon-wrap blue"><i class="fas fa-users"></i></div>
+          <div class="stat-num" id="stat-total-users">—</div>
+          <div class="stat-label">Total Students</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon-wrap yellow"><i class="fas fa-clock"></i></div>
+          <div class="stat-num" id="stat-pending">—</div>
+          <div class="stat-label">Pending Orders</div>
+        </div>
+      </div>
+      <div class="card" style="margin-bottom:16px">
+        <div class="card-title">🏆 Most Ordered Today</div>
+        <div id="top-items-wrap"><p style="color:var(--text-3);font-size:13px">Loading…</p></div>
+      </div>
+      <div class="card">
+        <div class="card-title" style="display:flex;align-items:center;justify-content:space-between">
+          <span>🕐 Recent Orders</span>
+          <button class="btn btn-ghost btn-sm" onclick="renderAdminDashboard()"><i class="fas fa-sync-alt"></i> Refresh</button>
+        </div>
+        <div class="data-table-wrap">
+          <table class="data-table">
+            <thead><tr><th>Order</th><th>Student</th><th>Items</th><th>Amount</th><th>Status</th><th>Update</th><th>Receipt</th></tr></thead>
+            <tbody id="dashboard-orders-body">
+              <tr><td colspan="7" style="text-align:center;padding:20px"><i class="fas fa-spinner spin"></i></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ─── ORDERS ─── -->
+    <div class="admin-tab-panel hidden" data-panel="orders">
+      <div class="toolbar">
+        <div class="page-title" style="margin:0">All Orders</div>
+        <div style="margin-left:auto;display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+          <select id="orders-status-filter" class="status-select" style="padding:9px 14px;font-size:13px" onchange="loadAdminOrders(this.value)">
+            <option value="">All Statuses</option>
+            <option value="pending">Pending</option>
+            <option value="confirmed">Confirmed</option>
+            <option value="preparing">Preparing</option>
+            <option value="ready">Ready</option>
+            <option value="completed">Completed</option>
+            <option value="cancelled">Cancelled</option>
+          </select>
+          <button class="btn btn-ghost btn-sm" onclick="loadAdminOrders(document.getElementById('orders-status-filter').value)"><i class="fas fa-sync-alt"></i> Refresh</button>
+        </div>
+      </div>
+      <div class="data-table-wrap">
+        <table class="data-table">
+          <thead><tr><th>Order #</th><th>Student</th><th>Items</th><th>Amount</th><th>Status</th><th>Update</th><th>Receipt</th></tr></thead>
+          <tbody id="admin-orders-body">
+            <tr><td colspan="7" style="text-align:center;padding:20px"><i class="fas fa-spinner spin"></i></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ─── MENU ─── -->
+    <div class="admin-tab-panel hidden" data-panel="menu">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:10px">
+        <div class="page-title" style="margin:0">Menu Items</div>
+        <button class="btn btn-primary" style="width:auto;padding:10px 20px" onclick="openModal('add-item-modal')"><i class="fas fa-plus"></i> Add Item</button>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:14px" id="admin-menu-list">
+        <div style="text-align:center;padding:20px;grid-column:1/-1"><i class="fas fa-spinner spin"></i></div>
+      </div>
+    </div>
+
+    <!-- ─── STUDENTS ─── -->
+    <div class="admin-tab-panel hidden" data-panel="users">
+      <div class="toolbar">
+        <div class="page-title" style="margin:0">Registered Students</div>
+        <div style="margin-left:auto;display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+          <div class="search-bar">
+            <i class="fas fa-search"></i>
+            <input type="text" id="student-search" placeholder="Search name, email or phone…" oninput="filterStudents(this.value)">
+          </div>
+          <button class="btn btn-ghost btn-sm" onclick="loadAdminUsers()"><i class="fas fa-sync-alt"></i> Refresh</button>
+        </div>
+      </div>
+      <div id="student-count" style="font-size:13px;color:var(--text-3);margin-bottom:12px"></div>
+      <div class="data-table-wrap">
+        <table class="data-table">
+          <thead><tr><th>ID</th><th>Name</th><th>Email</th><th>Phone</th><th>Joined</th><th>Orders</th></tr></thead>
+          <tbody id="admin-users-body">
+            <tr><td colspan="6" style="text-align:center;padding:20px"><i class="fas fa-spinner spin"></i></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ─── REVIEWS ─── -->
+    <div class="admin-tab-panel hidden" data-panel="reviews">
+      <div class="toolbar">
+        <div class="page-title" style="margin:0">Reviews & Feedback</div>
+        <button class="btn btn-ghost btn-sm" style="margin-left:auto" onclick="loadAdminReviews()"><i class="fas fa-sync-alt"></i> Refresh</button>
+      </div>
+      <div class="data-table-wrap">
+        <table class="data-table">
+          <thead><tr><th>Student</th><th>Item</th><th>Rating</th><th>Comment</th><th>Type</th><th>Date</th></tr></thead>
+          <tbody id="admin-reviews-body">
+            <tr><td colspan="6" style="text-align:center;padding:20px"><i class="fas fa-spinner spin"></i></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ─── ENQUIRIES ─── -->
+    <div class="admin-tab-panel hidden" data-panel="enquiries">
+      <div class="toolbar">
+        <div class="page-title" style="margin:0">Contact Enquiries</div>
+        <button class="btn btn-ghost btn-sm" style="margin-left:auto" onclick="loadAdminEnquiries()"><i class="fas fa-sync-alt"></i> Refresh</button>
+      </div>
+      <div class="data-table-wrap">
+        <table class="data-table">
+          <thead><tr><th>Name</th><th>Email</th><th>Phone</th><th>Type</th><th>Message</th><th>Status</th></tr></thead>
+          <tbody id="admin-enquiries-body">
+            <tr><td colspan="6" style="text-align:center;padding:20px"><i class="fas fa-spinner spin"></i></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+
+    <!-- ─── REFUNDS ─── -->
+    <div class="admin-tab-panel hidden" data-panel="refunds">
+      <div class="toolbar">
+        <div class="page-title" style="margin:0">Refund Requests</div>
+        <button class="btn btn-ghost btn-sm" style="margin-left:auto" onclick="loadAdminRefunds()"><i class="fas fa-sync-alt"></i> Refresh</button>
+      </div>
+      <div class="data-table-wrap">
+        <table class="data-table">
+          <thead><tr><th>Order</th><th>Student</th><th>Amount</th><th>Phone</th><th>Status</th><th>OTP</th><th>Action</th></tr></thead>
+          <tbody id="admin-refunds-body">
+            <tr><td colspan="7" style="text-align:center;padding:20px"><i class="fas fa-spinner spin"></i></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- Edit Item Modal -->
+<div class="dialog-overlay" id="edit-item-modal">
+  <div class="dialog" style="max-width:480px">
+    <div class="dialog-title">✏️ Edit Menu Item</div>
+    <form onsubmit="saveEditItem(event)">
+      <div class="form-group"><input type="text" id="edit-item-name" class="form-input" placeholder=" " required><label class="form-label">Item Name</label></div>
+      <div class="form-group"><input type="number" id="edit-item-price" class="form-input" placeholder=" " min="1" step="0.5" required><label class="form-label">Price (₹)</label></div>
+      <div class="form-group"><textarea id="edit-item-desc" class="form-input" rows="2" placeholder="Description…" style="padding-top:12px"></textarea></div>
+      <div class="form-group"><input type="url" id="edit-item-img" class="form-input" placeholder=" "><label class="form-label">Image URL</label></div>
+      <div class="form-group">
+        <select id="edit-item-avail" class="form-input">
+          <option value="1">Available</option>
+          <option value="0">Unavailable</option>
+        </select>
+      </div>
+      <div style="display:flex;gap:10px">
+        <button type="submit" class="btn btn-primary" style="flex:1">Save Changes</button>
+        <button type="button" class="btn btn-ghost" onclick="closeModal('edit-item-modal')">Cancel</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Add Item Modal -->
+<div class="dialog-overlay" id="add-item-modal">
+  <div class="dialog" style="max-width:480px">
+    <div class="dialog-title">➕ Add Menu Item</div>
+    <form onsubmit="submitAddItem(event)" id="add-item-form">
+      <div class="form-group"><input type="text" id="add-name" class="form-input" placeholder=" " required><label class="form-label">Item Name *</label></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+        <div class="form-group"><input type="number" id="add-price" class="form-input" placeholder=" " min="1" step="0.5" required><label class="form-label">Price (₹) *</label></div>
+        <div class="form-group">
+          <select id="add-cat" class="form-input" required>
+            <option value="">Category *</option>
+            <option value="1">Veg</option>
+            <option value="2">Non-Veg</option>
+            <option value="3">Snacks</option>
+            <option value="4">Drinks</option>
+            <option value="5">Desserts</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group"><textarea id="add-desc" class="form-input" rows="2" placeholder="Description…" style="padding-top:12px"></textarea></div>
+      <div class="form-group"><input type="url" id="add-img" class="form-input" placeholder=" "><label class="form-label">Image URL</label></div>
+      <div style="display:flex;gap:10px">
+        <button type="submit" class="btn btn-primary" style="flex:1"><i class="fas fa-plus"></i> Add Item</button>
+        <button type="button" class="btn btn-ghost" onclick="closeModal('add-item-modal')">Cancel</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Admin Receipt Modal -->
+<div class="dialog-overlay" id="admin-receipt-modal">
+  <div class="dialog" style="max-width:500px;overflow-y:auto;max-height:90vh">
+    <div id="admin-receipt-body"></div>
+  </div>
+</div>
+
+<script src="js/main.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', ()=>{
+  document.querySelectorAll('.sidebar-item[data-href]').forEach(item => {
+    item.addEventListener('click', () => { location.href = item.dataset.href; });
+  });
+});
+</script>
+</body>
+</html>
