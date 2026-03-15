@@ -42,6 +42,7 @@
         <div class="sidebar-item active" onclick="switchAdminTab('dashboard')"><i class="fas fa-chart-line"></i> Dashboard</div>
         <div class="sidebar-item" onclick="switchAdminTab('orders')"><i class="fas fa-receipt"></i> Manage Orders</div>
         <div class="sidebar-item" onclick="switchAdminTab('menu')"><i class="fas fa-utensils"></i> Manage Menu</div>
+        <div class="sidebar-item" onclick="switchAdminTab('schedule')"><i class="fas fa-calendar-week"></i> Weekly Schedule</div>
         <div class="sidebar-item" onclick="switchAdminTab('users')"><i class="fas fa-users"></i> Students</div>
         <div class="sidebar-item" onclick="switchAdminTab('reviews')"><i class="fas fa-star"></i> Reviews</div>
         <div class="sidebar-item" onclick="switchAdminTab('enquiries')"><i class="fas fa-envelope"></i> Enquiries <span class="notif-dot" id="enquiries-unread-badge" style="display:none"></span></div>
@@ -138,6 +139,60 @@
       </div>
       <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:14px" id="admin-menu-list">
         <div style="text-align:center;padding:20px;grid-column:1/-1"><i class="fas fa-spinner spin"></i></div>
+      </div>
+    </div>
+
+    <!-- ─── WEEKLY SCHEDULE ─── -->
+    <div class="admin-tab-panel hidden" data-panel="schedule">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:10px">
+        <div class="page-title" style="margin:0">Weekly Menu Schedule</div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <select id="schedule-copy-from" class="status-select" style="width:auto">
+            <option value="">Copy from day…</option>
+            <option value="1">Monday</option><option value="2">Tuesday</option>
+            <option value="3">Wednesday</option><option value="4">Thursday</option>
+            <option value="5">Friday</option><option value="6">Saturday</option>
+          </select>
+          <button class="btn btn-ghost btn-sm" onclick="copyScheduleToActive()"><i class="fas fa-copy"></i> Copy to Selected Day</button>
+          <button class="btn btn-primary btn-sm" onclick="saveActiveSchedule()"><i class="fas fa-save"></i> Save Schedule</button>
+        </div>
+      </div>
+
+      <!-- Day Tabs -->
+      <div class="schedule-day-tabs" id="schedule-day-tabs">
+        <div class="sched-day-tab active" data-day-id="" data-day-name="Monday" onclick="switchScheduleDay(this)">Mon</div>
+        <div class="sched-day-tab" data-day-id="" data-day-name="Tuesday" onclick="switchScheduleDay(this)">Tue</div>
+        <div class="sched-day-tab" data-day-id="" data-day-name="Wednesday" onclick="switchScheduleDay(this)">Wed</div>
+        <div class="sched-day-tab" data-day-id="" data-day-name="Thursday" onclick="switchScheduleDay(this)">Thu</div>
+        <div class="sched-day-tab" data-day-id="" data-day-name="Friday" onclick="switchScheduleDay(this)">Fri</div>
+        <div class="sched-day-tab" data-day-id="" data-day-name="Saturday" onclick="switchScheduleDay(this)">Sat</div>
+        <div class="sched-day-closed">Sun — Closed</div>
+      </div>
+
+      <!-- Active Day Name -->
+      <div style="display:flex;align-items:center;gap:12px;margin:16px 0 10px">
+        <div id="schedule-active-day-label" style="font-size:17px;font-weight:700;color:var(--primary)">Monday</div>
+        <div style="font-size:12px;color:var(--text-3)">Check items to include in this day's menu</div>
+        <div style="margin-left:auto;display:flex;gap:8px">
+          <button class="btn btn-ghost btn-sm" onclick="scheduleSelectAll(true)"><i class="fas fa-check-square"></i> All</button>
+          <button class="btn btn-ghost btn-sm" onclick="scheduleSelectAll(false)"><i class="far fa-square"></i> None</button>
+        </div>
+      </div>
+
+      <!-- Search -->
+      <div class="search-bar" style="margin-bottom:12px;max-width:340px">
+        <i class="fas fa-search"></i>
+        <input type="text" id="schedule-search" placeholder="Search menu items…" oninput="filterScheduleItems(this.value)">
+      </div>
+
+      <!-- Items Grid -->
+      <div id="schedule-items-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px">
+        <div style="grid-column:1/-1;text-align:center;padding:20px"><i class="fas fa-spinner spin"></i></div>
+      </div>
+
+      <div style="margin-top:20px;padding:12px 16px;background:var(--surface2);border-radius:10px;font-size:12px;color:var(--text-3)">
+        <i class="fas fa-info-circle" style="color:var(--info);margin-right:6px"></i>
+        Checked items will appear in that day's menu for students. Items marked <strong>Unavailable</strong> will still show but be greyed out with "Unavailable" badge. Sunday is always closed.
       </div>
     </div>
 

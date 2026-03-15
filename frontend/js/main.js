@@ -189,20 +189,35 @@ function progressHtml(status) {
    HOME PAGE – Menu
 ══════════════════════════════════════════════ */
 async function initHome() {
-  updateNavUser();  // just updates nav display, no redirect
+  updateNavUser();
   try {
-    const [catRes, itemRes] = await Promise.all([
+    const [catRes, todayRes] = await Promise.all([
       api('GET', `/menu/categories?canteen_id=${CANTEEN_ID}`),
-      api('GET', `/menu/items?canteen_id=${CANTEEN_ID}&available=1`),
+      api('GET', `/menu/schedule/today`),
     ]);
-    if (itemRes?.success) {
-      S.menuItems = itemRes.data.map(i=>({
-        id:i.id, cat:i.category_id, catName:i.category_name||'Food',
-        name:i.name, desc:i.description||'', price:parseFloat(i.price),
-        time:i.preparation_time||10, avail:i.is_available,
-        img:i.image_url||'', rating:0,
-      }));
+
+    const todayData = todayRes?.data || {};
+    const todayName = todayData.day || '';
+    const isClosed  = todayData.closed === true;
+
+    // Update hero chip with day info + weekly menu link
+    const heroChip = document.querySelector('.hero-chip');
+    if (heroChip && todayName) {
+      if (isClosed) {
+        heroChip.innerHTML = `<i class="fas fa-moon"></i> Closed today (Sunday) &nbsp;·&nbsp; <a href="weekly-menu.html" style="color:inherit;font-weight:700">View Weekly Menu</a>`;
+      } else {
+        heroChip.innerHTML = `<i class="fas fa-calendar-day"></i> ${todayName}'s Menu${todayData.fallback?' · All Items':''} &nbsp;·&nbsp; <a href="weekly-menu.html" style="color:inherit;font-weight:700">Full Week ›</a>`;
+      }
     }
+
+    const rawItems = isClosed ? [] : (todayData.items || []);
+    S.menuItems = rawItems.map(i=>({
+      id:i.id, cat:i.category_id, catName:i.category_name||'Food',
+      name:i.name, desc:i.description||'', price:parseFloat(i.price),
+      time:i.preparation_time||10, avail:i.is_available,
+      img:i.image_url||'', rating:0,
+    }));
+
     S.categories = [{id:'all',name:'All',icon:'🍽️'}];
     const catIcons = {'Veg':'🥗','Non-Veg':'🍗','Snacks':'🍟','Drinks':'🥤','Desserts':'🍮'};
     const seen = new Set();
@@ -212,6 +227,20 @@ async function initHome() {
         S.categories.push({id:i.cat, name:i.catName, icon:catIcons[i.catName]||'🍽️'});
       }
     });
+
+    if (isClosed) {
+      document.getElementById('menu-grid').innerHTML = `
+        <div class="empty-state" style="grid-column:1/-1">
+          <div class="empty-icon">🌙</div>
+          <h3>Canteen Closed Today</h3>
+          <p>We're closed on Sundays. See you Monday!</p>
+          <a href="weekly-menu.html" class="btn btn-primary" style="width:auto;padding:10px 24px;margin-top:12px">
+            <i class="fas fa-calendar-week"></i> View Weekly Menu
+          </a>
+        </div>`;
+      renderFilters();
+      return;
+    }
   } catch(e) {
     console.error('Menu load failed', e);
     document.getElementById('menu-grid').innerHTML = `<div class="empty-state" style="grid-column:1/-1"><div class="empty-icon">⚠️</div><h3>Cannot connect to server</h3><p>Make sure the backend is running on port 5000</p></div>`;
@@ -252,7 +281,7 @@ function renderGrid(search='') {
       <div class="card-img-wrap">
         <img src="${item.img}" alt="${item.name}" onerror="this.parentElement.querySelector('.card-img-placeholder').style.display='flex';this.style.display='none'">
         <div class="card-img-placeholder" style="display:none">🍽️</div>
-        <span class="card-badge ${item.avail?'avail':'unavail'}">${item.avail?'Available':'Sold Out'}</span>
+        <span class="card-badge ${item.avail?'avail':'unavail'}">${item.avail?'Available':'Unavailable'}</span>
         <div class="card-fav ${isFav?'loved':''}" onclick="event.stopPropagation();toggleFav(${item.id})">
           <i class="fa${isFav?'s':'r'} fa-heart"></i>
         </div>
@@ -264,8 +293,8 @@ function renderGrid(search='') {
         <div class="card-footer">
           <div><div class="card-price">₹${item.price}</div>
           <div class="card-time"><i class="fas fa-clock"></i> ${item.time} min</div></div>
-          <button class="add-btn" id="add-${item.id}" onclick="event.stopPropagation();addItem(${item.id})" ${!item.avail?'disabled':''}>
-            <i class="fas fa-plus"></i>
+          <button class="add-btn ${item.avail?'':' unavail-btn'}" id="add-${item.id}" onclick="event.stopPropagation();addItem(${item.id})" ${item.avail?'':'disabled'}>
+            <i class="${item.avail?'fas fa-plus':'fas fa-ban'}"></i>
           </button>
         </div>
       </div>
@@ -298,7 +327,7 @@ function openItemDetail(id) {
   const body = document.getElementById('item-detail-body');
   if (!body) return;
   body.innerHTML = `
-    <img src="${item.img}" alt="${item.name}" style="width:calc(100% + 52px);margin:-26px -26px 18px;height:220px;object-fit:cover;" onerror="this.style.background='linear-gradient(135deg,#FFB085,#FF6B35)'">
+    <img src="${item.img}" alt="${item.name}" style="width:calc(100% + 52px);margin:-26px -26px 18px;height:220px;object-fit:cover;display:block;" onerror="this.style.background='linear-gradient(135deg,#FFB085,#FF6B35)'">
     <div style="font-size:21px;font-weight:800;margin-bottom:6px">${item.name}</div>
     <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:10px">
       ${item.rating ? starsHtml(item.rating) : ''}
@@ -310,6 +339,32 @@ function openItemDetail(id) {
     <button class="btn btn-primary" onclick="addItem(${item.id});closeModal('item-modal')" ${!item.avail?'disabled':''}>
       <i class="fas fa-shopping-cart"></i> Add to Cart
     </button>`;
+  openModal('item-modal');
+}
+
+function openWeeklyItemDetail(id) {
+  const item = S.menuItems.find(i=>i.id===id);
+  if (!item) return;
+  const body = document.getElementById('item-detail-body');
+  if (!body) return;
+  body.innerHTML = `
+    <div class="wm-modal-img-wrap">
+      <img src="${item.img||item.image_url||''}" alt="${item.name}"
+        onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+      <div class="wm-modal-emoji" style="${(item.img||item.image_url)?'display:none':'display:flex'}">🍽️</div>
+    </div>
+    <div style="font-size:21px;font-weight:800;margin-bottom:6px">${item.name}</div>
+    <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:10px">
+      <span style="font-size:12px;color:var(--text-2)"><i class="fas fa-clock" style="color:var(--warning)"></i> ${item.time||item.preparation_time||'—'} min</span>
+      <span class="badge ${item.avail?'completed':'cancelled'}">${item.avail?'Available':'Unavailable'}</span>
+      <span style="font-size:11px;color:var(--text-3);background:var(--surface2);padding:3px 8px;border-radius:20px">${item.catName||item.category_name||''}</span>
+    </div>
+    <div style="font-size:13.5px;color:var(--text-2);line-height:1.7;margin-bottom:16px">${item.desc||item.description||'No description available.'}</div>
+    <div style="font-size:26px;font-weight:800;color:var(--primary);margin-bottom:6px">₹${item.price}</div>
+    <div style="font-size:11px;color:var(--text-3);margin-bottom:18px">
+      <i class="fas fa-info-circle" style="color:var(--info)"></i>
+      This item is shown for reference only. Visit the <a href="index.html" style="color:var(--primary);font-weight:600">Home page</a> to order today's menu.
+    </div>`;
   openModal('item-modal');
 }
 
@@ -1476,6 +1531,7 @@ function switchAdminTab(tab) {
   if (tab==='orders')    loadAdminOrders('');
   if (tab==='users')     loadAdminUsers();
   if (tab==='menu')      loadAdminMenu();
+  if (tab==='schedule')  loadAdminSchedule();
   if (tab==='dashboard') renderAdminDashboard();
   if (tab==='reviews')   loadAdminReviews();
   if (tab==='enquiries') loadAdminEnquiries();
@@ -1735,6 +1791,260 @@ document.addEventListener('DOMContentLoaded', () => {
   if (page==='profile')       initProfile();
   if (page==='transactions')  initTransactions();
   if (page==='reviews')       initReviews();
+  if (page==='weekly-menu')   initWeeklyMenu();
   if (page==='admin')         initAdmin();
   if (page==='admin-profile') initAdminProfile();
 });
+
+/* ══════════════════════════════════════════════
+   ADMIN – WEEKLY SCHEDULE MANAGER
+══════════════════════════════════════════════ */
+let _scheduleData    = [];   // [{day_id, day_name, items:[...]}]
+let _allMenuItems    = [];   // full item catalogue
+let _activeDayId     = null;
+let _activeDayName   = 'Monday';
+let _scheduleChecked = {};   // { day_id: Set(item_ids) }
+
+async function loadAdminSchedule() {
+  const grid = document.getElementById('schedule-items-grid');
+  if (grid) grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:20px"><i class="fas fa-spinner spin"></i></div>';
+
+  try {
+    const [schedRes, itemsRes] = await Promise.all([
+      api('GET', '/menu/schedule/days'),
+      api('GET', `/menu/items?canteen_id=${CANTEEN_ID}`),
+    ]);
+
+    _scheduleData = schedRes?.data || [];
+    _allMenuItems = itemsRes?.data || [];
+
+    // Build checked sets from schedule data
+    _scheduleChecked = {};
+    _scheduleData.forEach(d => {
+      _scheduleChecked[d.day_id] = new Set((d.items||[]).map(i=>i.id));
+    });
+
+    // Set day IDs on tabs
+    const tabs = document.querySelectorAll('.sched-day-tab');
+    const DAYS = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+    tabs.forEach((tab, idx) => {
+      const day = _scheduleData.find(d => d.day_name === DAYS[idx]);
+      if (day) {
+        tab.dataset.dayId   = day.day_id;
+        tab.dataset.dayName = day.day_name;
+      }
+    });
+
+    // Activate first tab
+    const firstTab = document.querySelector('.sched-day-tab');
+    if (firstTab) switchScheduleDay(firstTab);
+
+  } catch(e) {
+    if (grid) grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:20px;color:var(--danger)">Failed to load schedule</div>';
+  }
+}
+
+function switchScheduleDay(tabEl) {
+  document.querySelectorAll('.sched-day-tab').forEach(t => t.classList.remove('active'));
+  tabEl.classList.add('active');
+  _activeDayId   = parseInt(tabEl.dataset.dayId);
+  _activeDayName = tabEl.dataset.dayName;
+  const label = document.getElementById('schedule-active-day-label');
+  if (label) label.textContent = _activeDayName;
+  renderScheduleGrid(_allMenuItems);
+}
+
+function renderScheduleGrid(items) {
+  const grid = document.getElementById('schedule-items-grid');
+  if (!grid) return;
+  if (!items.length) {
+    grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:20px;color:var(--text-2)">No menu items found</div>';
+    return;
+  }
+  const checked = _scheduleChecked[_activeDayId] || new Set();
+  grid.innerHTML = items.map(item => {
+    const isOn = checked.has(item.id);
+    const avail = item.is_available;
+    return `<label class="sched-item-card ${isOn?'checked':''} ${!avail?'unavail-item':''}" for="sched-${_activeDayId}-${item.id}">
+      <input type="checkbox" id="sched-${_activeDayId}-${item.id}"
+        ${isOn?'checked':''}
+        onchange="toggleScheduleItem(${item.id},this.checked)">
+      <div class="sched-item-thumb">
+        <img src="${item.image_url||''}" alt="" onerror="this.style.display='none'">
+        <div class="sched-item-emoji" style="${item.image_url?'display:none':''}">🍽️</div>
+      </div>
+      <div class="sched-item-info">
+        <div class="sched-item-name">${item.name}</div>
+        <div class="sched-item-meta">₹${item.price} · ${item.category_name||''}
+          ${!avail?'<span class="badge cancelled" style="font-size:9px;padding:1px 6px">Unavailable</span>':''}
+        </div>
+      </div>
+      <div class="sched-check-icon"><i class="fas fa-check-circle"></i></div>
+    </label>`;
+  }).join('');
+}
+
+function toggleScheduleItem(itemId, isChecked) {
+  if (!_scheduleChecked[_activeDayId]) _scheduleChecked[_activeDayId] = new Set();
+  if (isChecked) _scheduleChecked[_activeDayId].add(itemId);
+  else           _scheduleChecked[_activeDayId].delete(itemId);
+  // Update card style
+  const card = document.querySelector(`label[for="sched-${_activeDayId}-${itemId}"]`);
+  if (card) card.classList.toggle('checked', isChecked);
+}
+
+function scheduleSelectAll(val) {
+  if (!_scheduleChecked[_activeDayId]) _scheduleChecked[_activeDayId] = new Set();
+  const visibleCards = document.querySelectorAll('#schedule-items-grid label.sched-item-card');
+  visibleCards.forEach(card => {
+    const cb = card.querySelector('input[type=checkbox]');
+    if (!cb) return;
+    const itemId = parseInt(cb.id.split('-').pop());
+    cb.checked = val;
+    if (val) _scheduleChecked[_activeDayId].add(itemId);
+    else     _scheduleChecked[_activeDayId].delete(itemId);
+    card.classList.toggle('checked', val);
+  });
+}
+
+function filterScheduleItems(query) {
+  const filtered = query
+    ? _allMenuItems.filter(i => i.name.toLowerCase().includes(query.toLowerCase()) || (i.category_name||'').toLowerCase().includes(query.toLowerCase()))
+    : _allMenuItems;
+  renderScheduleGrid(filtered);
+}
+
+async function saveActiveSchedule() {
+  if (!_activeDayId) { toast('Select a day first','error'); return; }
+  const item_ids = Array.from(_scheduleChecked[_activeDayId] || []);
+  try {
+    const res = await api('PUT', `/menu/schedule/day/${_activeDayId}`, { item_ids });
+    if (res?.success) {
+      toast(`${_activeDayName} menu saved — ${item_ids.length} item${item_ids.length!==1?'s':''}`, 'success');
+    } else {
+      toast(res?.message || 'Save failed', 'error');
+    }
+  } catch(e) { toast('Server error','error'); }
+}
+
+async function copyScheduleToActive() {
+  const fromSel = document.getElementById('schedule-copy-from');
+  const fromId  = parseInt(fromSel?.value);
+  if (!fromId) { toast('Select a source day to copy from','error'); return; }
+  if (fromId === _activeDayId) { toast('Source and target day are the same','error'); return; }
+
+  const fromName = fromSel.options[fromSel.selectedIndex].text;
+  try {
+    const res = await api('POST', '/menu/schedule/copy', { from_day_id: fromId, to_day_id: _activeDayId });
+    if (res?.success) {
+      toast(`Copied ${fromName} → ${_activeDayName}`, 'success');
+      await loadAdminSchedule();
+      // Re-activate current day tab
+      const activeTab = document.querySelector(`.sched-day-tab[data-day-name="${_activeDayName}"]`);
+      if (activeTab) switchScheduleDay(activeTab);
+    } else {
+      toast(res?.message || 'Copy failed','error');
+    }
+  } catch(e) { toast('Server error','error'); }
+}
+
+/* ══════════════════════════════════════════════
+   WEEKLY MENU PAGE
+══════════════════════════════════════════════ */
+async function initWeeklyMenu() {
+  updateNavUser();
+  cartBadge();
+  const container = document.getElementById('weekly-menu-container');
+  if (!container) return;
+
+  try {
+    const res = await api('GET', '/menu/schedule/days');
+    if (!res?.success) throw new Error('Failed');
+
+    const days      = res.data;  // [{day_id, day_name, items:[]}]
+    const todayNum  = new Date().getDay(); // 0=Sun,1=Mon,...6=Sat
+    const dayNames  = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+    const todayName = dayNames[todayNum];
+
+    // Highlight today chip
+    const todayChip = document.getElementById('wm-today-chip');
+    if (todayChip && todayName !== 'Sunday') {
+      todayChip.style.display = 'inline-flex';
+      todayChip.innerHTML = `<i class="fas fa-star"></i>&nbsp; Today is ${todayName}`;
+    }
+
+    // Highlight correct day pill
+    document.querySelectorAll('.wm-day-pill').forEach(pill => {
+      if (pill.textContent.trim().startsWith(todayName.slice(0,3))) {
+        pill.classList.add('today');
+      }
+    });
+
+    if (!days.length) {
+      container.innerHTML = '<div class="empty-state"><div class="empty-icon">📋</div><h3>No schedule set up yet</h3><p>Check back soon!</p></div>';
+      return;
+    }
+
+    container.innerHTML = days.map(day => {
+      const isToday = day.day_name === todayName;
+      const items   = day.items || [];
+      return `
+        <div class="wm-day-section ${isToday?'wm-today-section':''}" id="day-${day.day_name}">
+          <div class="wm-day-header">
+            <div class="wm-day-name">
+              ${isToday ? '<i class="fas fa-star" style="color:var(--warning);margin-right:6px"></i>' : ''}
+              ${day.day_name}
+            </div>
+            ${isToday ? '<span class="badge completed" style="font-size:11px">Today</span>' : ''}
+            <span style="font-size:12px;color:var(--text-3);margin-left:auto">${items.length} item${items.length!==1?'s':''}</span>
+          </div>
+          ${items.length ? `
+            <div class="wm-items-grid">
+              ${items.map(item => `
+                <div class="wm-item-card ${!item.is_available?'wm-unavail':''}" onclick="openWeeklyItemDetail(${item.id})">
+                  <div class="wm-item-img">
+                    <img src="${item.image_url||''}" alt="${item.name}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+                    <div class="wm-item-emoji" style="${item.image_url?'display:none':'display:flex'}">🍽️</div>
+                  </div>
+                  <div class="wm-item-body">
+                    <div class="wm-item-name">${item.name}</div>
+                    <div class="wm-item-cat">${item.category_name||''}</div>
+                    <div class="wm-item-foot">
+                      <span class="wm-item-price">₹${item.price}</span>
+                      ${!item.is_available
+                        ? '<span class="badge cancelled" style="font-size:9px;padding:2px 7px">Unavailable</span>'
+                        : '<span class="badge completed" style="font-size:9px;padding:2px 7px">Available</span>'
+                      }
+                    </div>
+                  </div>
+                </div>`).join('')}
+            </div>` : `
+            <div class="wm-empty-day">
+              <i class="fas fa-utensils" style="font-size:22px;color:var(--text-3)"></i>
+              <p>No items scheduled for ${day.day_name} yet.</p>
+            </div>`}
+        </div>`;
+    }).join('');
+
+    // load items into S.menuItems for the detail modal
+    const allItemsRes = await api('GET', `/menu/items?canteen_id=${CANTEEN_ID}`);
+    if (allItemsRes?.success) {
+      S.menuItems = allItemsRes.data.map(i=>({
+        id:i.id, cat:i.category_id, catName:i.category_name||'Food',
+        name:i.name, desc:i.description||'', price:parseFloat(i.price),
+        time:i.preparation_time||10, avail:i.is_available,
+        img:i.image_url||'', rating:0,
+      }));
+    }
+
+    // Smooth scroll to today
+    if (todayName !== 'Sunday') {
+      setTimeout(() => {
+        document.getElementById(`day-${todayName}`)?.scrollIntoView({ behavior:'smooth', block:'start' });
+      }, 300);
+    }
+
+  } catch(e) {
+    container.innerHTML = '<div class="empty-state"><div class="empty-icon">⚠️</div><h3>Could not load weekly menu</h3><p>Check server connection</p></div>';
+  }
+}

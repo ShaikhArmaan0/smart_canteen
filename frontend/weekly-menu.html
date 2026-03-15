@@ -2,20 +2,12 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Home – Smart Canteen</title>
+<title>Weekly Menu – Smart Canteen</title>
 <link rel="stylesheet" href="css/style.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
-<body data-page="home">
+<body data-page="weekly-menu">
 <div id="toast-wrap"></div>
-
-<!-- Splash (session-gated) -->
-<div id="splash">
-  <div class="splash-icon">🍽️</div>
-  <div class="splash-title">Smart Canteen</div>
-  <div class="splash-sub">Main Campus</div>
-  <div class="splash-ring"></div>
-</div>
 
 <!-- NAVBAR -->
 <nav class="navbar">
@@ -23,12 +15,6 @@
     <div class="nav-logo">🍽️</div>
     <div><div class="nav-title">Smart Canteen</div><div class="nav-subtitle">Main Campus</div></div>
   </a>
-  <div class="nav-center">
-    <div class="nav-search">
-      <i class="fas fa-search"></i>
-      <input type="text" id="search-input" placeholder="Search food items…">
-    </div>
-  </div>
   <div class="nav-right">
     <span id="nav-user-name" class="nav-user-name hidden-mobile"></span>
     <a class="nav-btn" href="cart.html" title="Cart">
@@ -49,7 +35,7 @@
       <div class="sidebar-group">
         <div class="sidebar-label">Menu</div>
         <div class="sidebar-item" data-href="index.html"><i class="fas fa-home"></i> Home</div>
-        <div class="sidebar-item" data-href="weekly-menu.html"><i class="fas fa-calendar-week"></i> Weekly Menu</div>
+        <div class="sidebar-item active" data-href="weekly-menu.html"><i class="fas fa-calendar-week"></i> Weekly Menu</div>
         <div class="sidebar-item" data-href="orders.html"><i class="fas fa-receipt"></i> My Orders</div>
         <div class="sidebar-item" data-href="cart.html"><i class="fas fa-shopping-cart"></i> Cart <span class="sidebar-badge cart-badge" style="display:none">0</span></div>
         <div class="sidebar-item" data-href="transactions.html"><i class="fas fa-history"></i> Transactions</div>
@@ -57,9 +43,7 @@
       <div class="sidebar-group">
         <div class="sidebar-label">More</div>
         <div class="sidebar-item" data-href="reviews.html"><i class="fas fa-star"></i> Reviews</div>
-        <div class="sidebar-item" data-href="contact.html"><i class="fas fa-phone"></i> Contact / Bulk Orders</div>
-        <div class="sidebar-item" data-href="privacy.html"><i class="fas fa-shield-alt"></i> Privacy Policy</div>
-        <div class="sidebar-item" data-href="terms.html"><i class="fas fa-file-contract"></i> Terms & Conditions</div>
+        <div class="sidebar-item" data-href="contact.html"><i class="fas fa-phone"></i> Contact</div>
       </div>
     </div>
     <div class="sidebar-footer">
@@ -71,40 +55,52 @@
 
   <!-- MAIN -->
   <main class="main-content">
-    <!-- Hero -->
-    <div class="hero-banner">
-      <h1>What's cooking today? 🔥</h1>
-      <p>Fresh, hot meals from your campus canteen delivered right to your token number</p>
-      <div class="hero-chip"><i class="fas fa-clock"></i> Open now · 8 AM – 9 PM</div>
+
+    <!-- Header -->
+    <div class="hero-banner" style="padding:24px 28px">
+      <h1 style="font-size:clamp(20px,4vw,28px)">📅 This Week's Menu</h1>
+      <p>Browse what's available each day · Monday to Saturday · Sunday closed</p>
     </div>
 
-    <!-- Category Filters -->
-    <div class="filters-bar" id="filters-bar">
-      <div class="filter-chip active">🍽️ All</div>
+    <!-- Day pills / quick jump -->
+    <div style="display:flex;gap:8px;flex-wrap:wrap;padding:16px 0 8px">
+      <span id="wm-today-chip" style="display:none" class="badge completed" style="font-size:12px;padding:6px 14px">
+        <i class="fas fa-star"></i> Today
+      </span>
+      <a class="wm-day-pill" href="#day-Monday">Mon</a>
+      <a class="wm-day-pill" href="#day-Tuesday">Tue</a>
+      <a class="wm-day-pill" href="#day-Wednesday">Wed</a>
+      <a class="wm-day-pill" href="#day-Thursday">Thu</a>
+      <a class="wm-day-pill" href="#day-Friday">Fri</a>
+      <a class="wm-day-pill" href="#day-Saturday">Sat</a>
+      <span class="wm-day-pill" style="opacity:.4;cursor:default">Sun — Closed</span>
     </div>
 
-    <!-- Menu Grid -->
-    <div class="section-header">
-      <div class="section-title">Today's Menu</div>
-      <div class="section-count" id="item-count">(0)</div>
+    <!-- Days container -->
+    <div id="weekly-menu-container">
+      <div class="empty-state"><i class="fas fa-spinner spin" style="font-size:28px"></i><p>Loading weekly menu…</p></div>
     </div>
-    <div class="menu-grid" id="menu-grid">
-      <!-- Skeleton placeholders -->
-      <div style="aspect-ratio:4/3;border-radius:18px" class="skeleton"></div>
-      <div style="aspect-ratio:4/3;border-radius:18px" class="skeleton"></div>
-      <div style="aspect-ratio:4/3;border-radius:18px" class="skeleton"></div>
-      <div style="aspect-ratio:4/3;border-radius:18px" class="skeleton"></div>
+
+    <!-- Sunday closed card -->
+    <div class="wm-day-section" id="day-Sunday" style="margin-top:20px">
+      <div class="wm-day-header wm-closed-header">
+        <div class="wm-day-name">☽ Sunday</div>
+        <div class="badge cancelled">Closed</div>
+      </div>
+      <div class="wm-closed-msg">
+        <div class="empty-icon" style="font-size:36px">🌙</div>
+        <p>Canteen is closed on Sundays. Rest up and see you Monday!</p>
+      </div>
     </div>
+
   </main>
 </div>
 
-<!-- Item Detail Modal -->
-<div class="overlay" id="item-modal">
-  <div class="sheet">
-    <div class="sheet-scroll">
-      <div class="sheet-handle"></div>
-      <div id="item-detail-body"></div>
-    </div>
+<!-- Item Detail Modal (re-used from home) -->
+<div class="dialog-overlay" id="item-modal">
+  <div class="dialog">
+    <div id="item-detail-body"></div>
+    <button class="btn btn-ghost" style="margin-top:12px" onclick="closeModal('item-modal')">Close</button>
   </div>
 </div>
 

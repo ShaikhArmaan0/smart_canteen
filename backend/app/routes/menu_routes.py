@@ -112,3 +112,118 @@ def delete_item(item_id):
 @menu_bp.route("/time-slots", methods=["GET"])
 def get_time_slots():
     return success_response([s.to_dict() for s in TimeSlot.query.all()])
+
+
+# ── Weekly Schedule Routes ───────────────────────────────────────────────────
+from ..models.menu_model import MenuDay, MenuSchedule
+
+DAYS_ORDER = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"]
+
+def _ensure_days():
+    """Seed MenuDay rows if they don't exist."""
+    for name in DAYS_ORDER:
+        if not MenuDay.query.filter_by(day_name=name).first():
+            db.session.add(MenuDay(day_name=name))
+    db.session.commit()
+
+
+@menu_bp.route("/schedule/days", methods=["GET"])
+def get_schedule_days():
+    """Return all 6 days with their scheduled items."""
+    _ensure_days()
+    days = MenuDay.query.all()
+    # sort by DAYS_ORDER
+    days_sorted = sorted(days, key=lambda d: DAYS_ORDER.index(d.day_name) if d.day_name in DAYS_ORDER else 99)
+    result = []
+    for day in days_sorted:
+        items = (
+            db.session.query(MenuItem)
+            .join(MenuSchedule, MenuSchedule.menu_item_id == MenuItem.id)
+            .filter(MenuSchedule.day_id == day.id)
+            .all()
+        )
+        result.append({
+            "day_id":   day.id,
+            "day_name": day.day_name,
+            "items":    [i.to_dict() for i in items],
+        })
+    return success_response(result)
+
+
+@menu_bp.route("/schedule/today", methods=["GET"])
+def get_today_menu():
+    """Return items scheduled for today (Mon–Sat). Sunday → closed."""
+    import datetime
+    _ensure_days()
+    today_num = datetime.datetime.now().weekday()  # 0=Mon … 6=Sun
+    if today_num == 6:  # Sunday
+        return success_response({"day": "Sunday", "closed": True, "items": []})
+    day_name = DAYS_ORDER[today_num]
+    day = MenuDay.query.filter_by(day_name=day_name).first()
+    if not day:
+        return success_response({"day": day_name, "closed": False, "items": []})
+
+    items = (
+        db.session.query(MenuItem)
+        .join(MenuSchedule, MenuSchedule.menu_item_id == MenuItem.id)
+        .filter(MenuSchedule.day_id == day.id)
+        .all()
+    )
+    # If admin hasn't set up any schedule yet, fall back to all items
+    if not items:
+        items = MenuItem.query.filter_by(canteen_id=1).all()
+        return success_response({"day": day_name, "closed": False, "items": [i.to_dict() for i in items], "fallback": True})
+
+    return success_response({"day": day_name, "closed": False, "items": [i.to_dict() for i in items]})
+
+
+@menu_bp.route("/schedule/day/<int:day_id>", methods=["PUT"])
+@admin_required
+def set_day_schedule(day_id):
+    """Set the full list of items for a given day (replaces existing)."""
+    data     = get_request_data()
+    item_ids = data.get("item_ids", [])   # list of menu_item ids
+
+    day = MenuDay.query.get(day_id)
+    if not day:
+        return error_response("Day not found", 404)
+
+    # Delete old assignments for this day
+    MenuSchedule.query.filter_by(day_id=day_id).delete()
+
+    # Create new ones
+    for mid in item_ids:
+        item = MenuItem.query.get(mid)
+        if item:
+            db.session.add(MenuSchedule(
+                menu_item_id=mid,
+                day_id=day_id,
+                time_slot_id=1,   # default slot
+                is_active=True,
+            ))
+    db.session.commit()
+    log_admin_action(get_current_user_id(), f"Updated schedule for day_id={day_id}: {len(item_ids)} items")
+    return success_response(None, f"Schedule for {day.day_name} updated")
+
+
+@menu_bp.route("/schedule/copy", methods=["POST"])
+@admin_required
+def copy_day_schedule():
+    """Copy schedule from one day to another."""
+    data     = get_request_data()
+    from_id  = data.get("from_day_id")
+    to_id    = data.get("to_day_id")
+    if not from_id or not to_id:
+        return error_response("from_day_id and to_day_id required", 422)
+
+    src_schedules = MenuSchedule.query.filter_by(day_id=from_id).all()
+    MenuSchedule.query.filter_by(day_id=to_id).delete()
+    for s in src_schedules:
+        db.session.add(MenuSchedule(
+            menu_item_id=s.menu_item_id,
+            day_id=to_id,
+            time_slot_id=s.time_slot_id,
+            is_active=s.is_active,
+        ))
+    db.session.commit()
+    return success_response(None, "Schedule copied")

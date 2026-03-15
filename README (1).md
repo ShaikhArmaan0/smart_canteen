@@ -158,7 +158,7 @@ python -m http.server 8080
 ```
 Frontend runs at: `http://localhost:8080`
 
-> **Open your browser at:** `http://localhost:8080`
+> **Open your browser at:** ` `
 
 ---
 

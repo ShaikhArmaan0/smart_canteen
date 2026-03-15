@@ -10,6 +10,12 @@ app = create_app(os.getenv("FLASK_ENV", "development"))
 # Auto-create any new tables on startup (safe - won't affect existing tables)
 with app.app_context():
     db.create_all()
+    # Ensure at least one TimeSlot exists (required for schedule routes)
+    from datetime import time as _time
+    from app.models.menu_model import TimeSlot as _TS
+    if not _TS.query.first():
+        db.session.add(_TS(name="All Day", start_time=_time(8, 0), end_time=_time(21, 0)))
+        db.session.commit()
 
 
 @app.cli.command("seed-db")
