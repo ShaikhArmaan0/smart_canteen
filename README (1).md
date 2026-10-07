@@ -317,8 +317,3 @@ After `flask seed-db`, your database will have:
 6. Use environment variables instead of `.env` file on the server
 
 ---
-
-## 📞 Support
-
-- Contact page: `http://localhost:8080/contact.html`
-- Admin panel: `http://localhost:8080/admin.html` (login as admin first)
